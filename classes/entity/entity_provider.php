@@ -25,10 +25,10 @@
 
 namespace customfield_lookup\entity;
 
-defined('MOODLE_INTERNAL') || die;
-
+/**
+ * Interface implemented by entity providers used by the lookup custom field.
+ */
 interface entity_provider {
-
     /**
      * Return the entity type key.
      *

@@ -32,10 +32,10 @@ use core_external\external_single_structure;
 use core_external\external_value;
 use customfield_lookup\field_controller;
 
-defined('MOODLE_INTERNAL') || die;
-
+/**
+ * External function that searches entities for the lookup custom field autocomplete.
+ */
 class search extends external_api {
-
     /**
      * Describes the parameters.
      *

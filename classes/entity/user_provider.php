@@ -25,18 +25,34 @@
 
 namespace customfield_lookup\entity;
 
-defined('MOODLE_INTERNAL') || die;
-
+/**
+ * Entity provider that exposes Moodle users to the lookup custom field.
+ */
 class user_provider implements entity_provider {
-
+    /**
+     * Return the entity type key.
+     *
+     * @return string
+     */
     public static function get_type(): string {
         return 'user';
     }
 
+    /**
+     * Return the human readable name for the user entity type.
+     *
+     * @return string
+     */
     public static function get_display_name(): string {
         return get_string('entitytype_user', 'customfield_lookup');
     }
 
+    /**
+     * Add user-specific configuration fields to the field configuration form.
+     *
+     * @param \MoodleQuickForm $mform
+     * @param array $configdata
+     */
     public static function config_form_definition(\MoodleQuickForm $mform, array $configdata): void {
         $roles = role_fix_names(get_all_roles(), \context_system::instance(), ROLENAME_ORIGINAL);
         $roleoptions = [];
@@ -44,10 +60,13 @@ class user_provider implements entity_provider {
             $roleoptions[$role->id] = $role->localname;
         }
 
-        $mform->addElement('autocomplete', 'configdata[roles]',
+        $mform->addElement(
+            'autocomplete',
+            'configdata[roles]',
             get_string('rolefilter', 'customfield_lookup'),
             $roleoptions,
-            ['multiple' => true]);
+            ['multiple' => true]
+        );
         $mform->addHelpButton('configdata[roles]', 'rolefilter', 'customfield_lookup');
 
         $displayoptions = [
@@ -71,6 +90,14 @@ class user_provider implements entity_provider {
         }
     }
 
+    /**
+     * Search users matching the given query, filtered by the configured roles.
+     *
+     * @param string $query
+     * @param array $configdata
+     * @param int $limit
+     * @return array
+     */
     public static function search(string $query, array $configdata, int $limit = 20): array {
         global $DB;
 
@@ -86,7 +113,7 @@ class user_provider implements entity_provider {
         $joinsql = '';
         if (!empty($configdata['roles'])) {
             $roleids = $configdata['roles'];
-            list($insql, $inparams) = $DB->get_in_or_equal($roleids, SQL_PARAMS_NAMED, 'role');
+            [$insql, $inparams] = $DB->get_in_or_equal($roleids, SQL_PARAMS_NAMED, 'role');
             $joinsql = "JOIN {role_assignments} ra ON ra.userid = u.id AND ra.roleid $insql";
             $params = array_merge($params, $inparams);
         }
@@ -110,6 +137,13 @@ class user_provider implements entity_provider {
         return $results;
     }
 
+    /**
+     * Return human readable labels for the given user IDs.
+     *
+     * @param array $ids
+     * @param array $configdata
+     * @return array id => display string
+     */
     public static function get_display_values(array $ids, array $configdata = []): array {
         global $DB;
 
@@ -117,7 +151,7 @@ class user_provider implements entity_provider {
             return [];
         }
 
-        list($insql, $params) = $DB->get_in_or_equal($ids, SQL_PARAMS_NAMED, 'uid');
+        [$insql, $params] = $DB->get_in_or_equal($ids, SQL_PARAMS_NAMED, 'uid');
         $records = $DB->get_records_select('user', "id $insql", $params);
 
         $values = [];
@@ -128,6 +162,13 @@ class user_provider implements entity_provider {
         return $values;
     }
 
+    /**
+     * Return any of the supplied user IDs that do not exist or have been deleted.
+     *
+     * @param array $ids
+     * @param array $configdata
+     * @return array invalid IDs
+     */
     public static function validate_ids(array $ids, array $configdata): array {
         global $DB;
 
@@ -135,12 +176,19 @@ class user_provider implements entity_provider {
             return [];
         }
 
-        list($insql, $params) = $DB->get_in_or_equal($ids, SQL_PARAMS_NAMED, 'uid');
+        [$insql, $params] = $DB->get_in_or_equal($ids, SQL_PARAMS_NAMED, 'uid');
         $existing = $DB->get_fieldset_select('user', 'id', "id $insql AND deleted = 0", $params);
 
         return array_diff($ids, $existing);
     }
 
+    /**
+     * Format a user record according to the configured display format.
+     *
+     * @param \stdClass $user
+     * @param array $configdata
+     * @return string
+     */
     private static function format_user_label(\stdClass $user, array $configdata): string {
         $format = $configdata['displayformat'] ?? 'fullname';
 
@@ -158,5 +206,4 @@ class user_provider implements entity_provider {
                 return fullname($user);
         }
     }
-
 }

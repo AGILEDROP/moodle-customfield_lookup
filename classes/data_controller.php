@@ -25,10 +25,10 @@
 
 namespace customfield_lookup;
 
-defined('MOODLE_INTERNAL') || die;
-
+/**
+ * Data controller for the lookup custom field.
+ */
 class data_controller extends \core_customfield\data_controller {
-
     /**
      * Return the name of the field where the information is stored.
      *
@@ -65,7 +65,9 @@ class data_controller extends \core_customfield\data_controller {
             }
         }
 
-        $mform->addElement('autocomplete', $elementname,
+        $mform->addElement(
+            'autocomplete',
+            $elementname,
             $field->get_formatted_name(),
             $options,
             [

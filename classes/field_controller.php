@@ -28,14 +28,14 @@ namespace customfield_lookup;
 use customfield_lookup\entity\entity_provider;
 use customfield_lookup\entity\user_provider;
 
-defined('MOODLE_INTERNAL') || die;
-
+/**
+ * Field controller for the lookup custom field.
+ */
 class field_controller extends \core_customfield\field_controller {
-
     /**
      * Plugin type.
      */
-    const TYPE = 'lookup';
+    public const TYPE = 'lookup';
 
     /**
      * Return the registered entity providers.
@@ -67,19 +67,28 @@ class field_controller extends \core_customfield\field_controller {
      * @param \MoodleQuickForm $mform
      */
     public function config_form_definition(\MoodleQuickForm $mform) {
-        $mform->addElement('header', 'header_specificsettings',
-            get_string('specificsettings', 'customfield_lookup'));
+        $mform->addElement(
+            'header',
+            'header_specificsettings',
+            get_string('specificsettings', 'customfield_lookup')
+        );
         $mform->setExpanded('header_specificsettings', true);
 
         // Entity type selector.
-        $mform->addElement('select', 'configdata[entitytype]',
+        $mform->addElement(
+            'select',
+            'configdata[entitytype]',
             get_string('entitytype', 'customfield_lookup'),
-            self::get_entity_providers());
+            self::get_entity_providers()
+        );
         $mform->setType('configdata[entitytype]', PARAM_ALPHA);
 
         // Multi-select toggle.
-        $mform->addElement('selectyesno', 'configdata[multiselect]',
-            get_string('multiselect', 'customfield_lookup'));
+        $mform->addElement(
+            'selectyesno',
+            'configdata[multiselect]',
+            get_string('multiselect', 'customfield_lookup')
+        );
         $mform->setType('configdata[multiselect]', PARAM_INT);
 
         // Entity-specific config fields.
