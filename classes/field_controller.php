@@ -38,15 +38,13 @@ class field_controller extends \core_customfield\field_controller {
     public const TYPE = 'lookup';
 
     /**
-     * Return the registered entity providers.
+     * Registered entity provider classes, keyed by entity type.
      *
-     * @return array type key => display name
+     * @var array<string, class-string<entity_provider>>
      */
-    public static function get_entity_providers(): array {
-        return [
-            user_provider::get_type() => user_provider::get_display_name(),
-        ];
-    }
+    private const PROVIDERS = [
+        'user' => user_provider::class,
+    ];
 
     /**
      * Resolve the provider class for a given entity type key.
@@ -55,10 +53,20 @@ class field_controller extends \core_customfield\field_controller {
      * @return string|null Fully qualified class name or null.
      */
     public static function get_provider_class(string $type): ?string {
-        $map = [
-            'user' => user_provider::class,
-        ];
-        return $map[$type] ?? null;
+        return self::PROVIDERS[$type] ?? null;
+    }
+
+    /**
+     * Return the registered entity providers as a select-friendly map.
+     *
+     * @return array type key => display name
+     */
+    public static function get_entity_providers(): array {
+        $options = [];
+        foreach (self::PROVIDERS as $type => $class) {
+            $options[$type] = $class::get_display_name();
+        }
+        return $options;
     }
 
     /**
@@ -93,11 +101,8 @@ class field_controller extends \core_customfield\field_controller {
 
         // Entity-specific config fields.
         $configdata = $this->get('configdata') ?: [];
-        foreach (self::get_entity_providers() as $type => $name) {
-            $providerclass = self::get_provider_class($type);
-            if ($providerclass) {
-                $providerclass::config_form_definition($mform, $configdata);
-            }
+        foreach (self::PROVIDERS as $providerclass) {
+            $providerclass::config_form_definition($mform, $configdata);
         }
     }
 }
