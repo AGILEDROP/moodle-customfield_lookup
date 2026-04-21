@@ -51,16 +51,12 @@ class data_controller extends \core_customfield\data_controller {
         $multiselect = !empty($config['multiselect']);
 
         // Pre-populate options for already selected values.
-        $currentvalue = $this->get_value();
+        $ids = self::parse_ids($this->get_value());
         $options = [];
-        if (!empty($currentvalue)) {
-            $ids = explode(',', $currentvalue);
-            $ids = array_map('intval', $ids);
-            $ids = array_filter($ids);
-
+        if (!empty($ids)) {
             $entitytype = $config['entitytype'] ?? 'user';
             $providerclass = field_controller::get_provider_class($entitytype);
-            if ($providerclass && !empty($ids)) {
+            if ($providerclass) {
                 $options = $providerclass::get_display_values($ids, $config);
             }
         }
@@ -142,14 +138,7 @@ class data_controller extends \core_customfield\data_controller {
      */
     public function export_value() {
         $value = $this->get_value();
-        if (empty($value)) {
-            return null;
-        }
-
-        $ids = explode(',', $value);
-        $ids = array_map('intval', $ids);
-        $ids = array_filter($ids);
-
+        $ids = self::parse_ids($value);
         if (empty($ids)) {
             return null;
         }
@@ -165,5 +154,18 @@ class data_controller extends \core_customfield\data_controller {
         $displayvalues = $providerclass::get_display_values($ids, $config);
 
         return implode(', ', $displayvalues);
+    }
+
+    /**
+     * Parse a stored comma-separated value into a list of positive integer IDs.
+     *
+     * @param string|null $value
+     * @return int[]
+     */
+    private static function parse_ids(?string $value): array {
+        if (empty($value)) {
+            return [];
+        }
+        return array_values(array_filter(array_map('intval', explode(',', $value))));
     }
 }
