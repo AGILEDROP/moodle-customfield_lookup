@@ -74,7 +74,7 @@ class search extends external_api {
         $providerclass = field_controller::get_provider_class($entitytype);
 
         if (!$providerclass) {
-            return ['results' => []];
+            throw new \moodle_exception('unknownentitytype', 'customfield_lookup', '', $entitytype);
         }
 
         $results = $providerclass::search($query, $configdata);

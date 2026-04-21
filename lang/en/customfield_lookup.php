@@ -39,3 +39,4 @@ $string['privacy:metadata'] = 'The Lookup field type plugin doesn\'t store any p
 $string['rolefilter'] = 'Filter by roles';
 $string['rolefilter_help'] = 'Only users with the selected roles will be available for selection. Leave empty to allow all users.';
 $string['specificsettings'] = 'Lookup field settings';
+$string['unknownentitytype'] = 'Unknown entity type: {$a}';

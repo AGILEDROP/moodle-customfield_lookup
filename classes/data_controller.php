@@ -148,7 +148,7 @@ class data_controller extends \core_customfield\data_controller {
         $providerclass = field_controller::get_provider_class($entitytype);
 
         if (!$providerclass) {
-            return $value;
+            throw new \moodle_exception('unknownentitytype', 'customfield_lookup', '', $entitytype);
         }
 
         $displayvalues = $providerclass::get_display_values($ids, $config);
