@@ -49,6 +49,26 @@ class user_provider implements entity_provider {
             $roleoptions,
             ['multiple' => true]);
         $mform->addHelpButton('configdata[roles]', 'rolefilter', 'customfield_lookup');
+
+        $displayoptions = [
+            'fullname' => get_string('displayformat_fullname', 'customfield_lookup'),
+            'firstname' => get_string('displayformat_firstname', 'customfield_lookup'),
+            'lastname' => get_string('displayformat_lastname', 'customfield_lookup'),
+            'firstname_lastname' => get_string('displayformat_firstname_lastname', 'customfield_lookup'),
+            'lastname_firstname' => get_string('displayformat_lastname_firstname', 'customfield_lookup'),
+        ];
+
+        $mform->addElement(
+            'select',
+            'configdata[displayformat]',
+            get_string('displayformat', 'customfield_lookup'),
+            $displayoptions
+        );
+        $mform->setType('configdata[displayformat]', PARAM_ALPHA);
+
+        if (empty($configdata['displayformat'])) {
+            $mform->setDefault('configdata[displayformat]', 'fullname');
+        }
     }
 
     public static function search(string $query, array $configdata, int $limit = 20): array {
@@ -83,14 +103,14 @@ class user_provider implements entity_provider {
         foreach ($records as $record) {
             $results[] = [
                 'id' => (int) $record->id,
-                'fullname' => fullname($record),
+                'fullname' => self::format_user_label($record, $configdata),
             ];
         }
 
         return $results;
     }
 
-    public static function get_display_values(array $ids): array {
+    public static function get_display_values(array $ids, array $configdata = []): array {
         global $DB;
 
         if (empty($ids)) {
@@ -102,7 +122,7 @@ class user_provider implements entity_provider {
 
         $values = [];
         foreach ($records as $record) {
-            $values[$record->id] = fullname($record);
+            $values[$record->id] = self::format_user_label($record, $configdata);
         }
 
         return $values;
@@ -120,4 +140,23 @@ class user_provider implements entity_provider {
 
         return array_diff($ids, $existing);
     }
+
+    private static function format_user_label(\stdClass $user, array $configdata): string {
+        $format = $configdata['displayformat'] ?? 'fullname';
+
+        switch ($format) {
+            case 'firstname':
+                return (string) $user->firstname;
+            case 'lastname':
+                return (string) $user->lastname;
+            case 'firstname_lastname':
+                return trim($user->firstname . ' ' . $user->lastname);
+            case 'lastname_firstname':
+                return trim($user->lastname . ', ' . $user->firstname);
+            case 'fullname':
+            default:
+                return fullname($user);
+        }
+    }
+
 }

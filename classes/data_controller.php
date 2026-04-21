@@ -61,7 +61,7 @@ class data_controller extends \core_customfield\data_controller {
             $entitytype = $config['entitytype'] ?? 'user';
             $providerclass = field_controller::get_provider_class($entitytype);
             if ($providerclass && !empty($ids)) {
-                $options = $providerclass::get_display_values($ids);
+                $options = $providerclass::get_display_values($ids, $config);
             }
         }
 
@@ -160,7 +160,7 @@ class data_controller extends \core_customfield\data_controller {
             return $value;
         }
 
-        $displayvalues = $providerclass::get_display_values($ids);
+        $displayvalues = $providerclass::get_display_values($ids, $config);
 
         return implode(', ', $displayvalues);
     }

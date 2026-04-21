@@ -57,7 +57,7 @@ interface entity_provider {
      * @param string $query
      * @param array $configdata
      * @param int $limit
-     * @return array Array of ['id' => int, 'label' => string]
+     * @return array Array of ['id' => int, 'fullname' => string]
      */
     public static function search(string $query, array $configdata, int $limit = 20): array;
 
@@ -65,9 +65,10 @@ interface entity_provider {
      * Get display value for one or more entity IDs.
      *
      * @param array $ids
+     * @param array $configdata
      * @return array Array of id => display string
      */
-    public static function get_display_values(array $ids): array;
+    public static function get_display_values(array $ids, array $configdata = []): array;
 
     /**
      * Validate that the given IDs are valid and selectable.
