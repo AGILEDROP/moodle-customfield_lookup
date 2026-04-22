@@ -33,6 +33,7 @@ $string['displayformat_lastname'] = 'Last name';
 $string['displayformat_lastname_firstname'] = 'Last name + first name';
 $string['entitytype'] = 'Entity type';
 $string['entitytype_user'] = 'Users';
+$string['invalidselection'] = 'One or more selected items are no longer available. Please reselect.';
 $string['multiselect'] = 'Allow multiple selections';
 $string['pluginname'] = 'Lookup';
 $string['privacy:metadata'] = 'The Lookup field type plugin doesn\'t store any personal data; it uses tables defined in core.';

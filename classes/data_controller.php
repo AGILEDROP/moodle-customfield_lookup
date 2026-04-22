@@ -105,6 +105,42 @@ class data_controller extends \core_customfield\data_controller {
     }
 
     /**
+     * Validate the selected IDs still exist and are selectable.
+     *
+     * @param array $data
+     * @param array $files
+     * @return array
+     */
+    public function instance_form_validation(array $data, array $files): array {
+        $errors = parent::instance_form_validation($data, $files);
+        $elementname = $this->get_form_element_name();
+
+        $value = $data[$elementname] ?? '';
+        if (is_array($value)) {
+            $value = implode(',', array_filter($value));
+        }
+
+        $ids = self::parse_ids($value);
+        if (empty($ids)) {
+            return $errors;
+        }
+
+        $config = $this->get_field()->get('configdata') ?: [];
+        $entitytype = $config['entitytype'] ?? 'user';
+        $providerclass = field_controller::get_provider_class($entitytype);
+        if (!$providerclass) {
+            return $errors;
+        }
+
+        $invalid = $providerclass::validate_ids($ids, $config);
+        if (!empty($invalid)) {
+            $errors[$elementname] = get_string('invalidselection', 'customfield_lookup');
+        }
+
+        return $errors;
+    }
+
+    /**
      * Prepares the custom field data to pass to mform->set_data().
      *
      * For multi-select, we need to convert the comma-separated string back to an array.
