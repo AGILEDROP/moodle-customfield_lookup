@@ -206,4 +206,13 @@ class user_provider implements entity_provider {
                 return fullname($user);
         }
     }
+
+    /**
+     * Require the calling user has permission to search this entity type.
+     *
+     * @param \context $context
+     */
+    public static function require_search_capability(\context $context): void {
+        require_capability('moodle/user:viewdetails', $context);
+    }
 }

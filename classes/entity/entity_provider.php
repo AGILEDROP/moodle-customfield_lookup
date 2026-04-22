@@ -78,4 +78,11 @@ interface entity_provider {
      * @return array Array of invalid IDs
      */
     public static function validate_ids(array $ids, array $configdata): array;
+
+    /**
+     * Require the calling user has permission to search this entity type.
+     *
+     * @param \context $context
+     */
+    public static function require_search_capability(\context $context): void;
 }

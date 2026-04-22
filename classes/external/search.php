@@ -66,10 +66,8 @@ class search extends external_api {
         $context = \context_system::instance();
         self::validate_context($context);
 
-        // Load the field and its config.
         $field = \core_customfield\field_controller::create($fieldid);
         $configdata = $field->get('configdata') ?: [];
-
         $entitytype = $configdata['entitytype'] ?? 'user';
         $providerclass = field_controller::get_provider_class($entitytype);
 
@@ -77,9 +75,9 @@ class search extends external_api {
             throw new \moodle_exception('unknownentitytype', 'customfield_lookup', '', $entitytype);
         }
 
-        $results = $providerclass::search($query, $configdata);
+        $providerclass::require_search_capability($context);
 
-        return ['results' => $results];
+        return ['results' => $providerclass::search($query, $configdata)];
     }
 
     /**
