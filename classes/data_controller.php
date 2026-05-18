@@ -25,10 +25,10 @@
 
 namespace customfield_lookup;
 
-defined('MOODLE_INTERNAL') || die;
-
+/**
+ * Data controller for the lookup custom field.
+ */
 class data_controller extends \core_customfield\data_controller {
-
     /**
      * Return the name of the field where the information is stored.
      *
@@ -51,21 +51,19 @@ class data_controller extends \core_customfield\data_controller {
         $multiselect = !empty($config['multiselect']);
 
         // Pre-populate options for already selected values.
-        $currentvalue = $this->get_value();
+        $ids = self::parse_ids($this->get_value());
         $options = [];
-        if (!empty($currentvalue)) {
-            $ids = explode(',', $currentvalue);
-            $ids = array_map('intval', $ids);
-            $ids = array_filter($ids);
-
+        if (!empty($ids)) {
             $entitytype = $config['entitytype'] ?? 'user';
             $providerclass = field_controller::get_provider_class($entitytype);
-            if ($providerclass && !empty($ids)) {
-                $options = $providerclass::get_display_values($ids);
+            if ($providerclass) {
+                $options = $providerclass::get_display_values($ids, $config);
             }
         }
 
-        $mform->addElement('autocomplete', $elementname,
+        $mform->addElement(
+            'autocomplete',
+            $elementname,
             $field->get_formatted_name(),
             $options,
             [
@@ -107,6 +105,42 @@ class data_controller extends \core_customfield\data_controller {
     }
 
     /**
+     * Validate the selected IDs still exist and are selectable.
+     *
+     * @param array $data
+     * @param array $files
+     * @return array
+     */
+    public function instance_form_validation(array $data, array $files): array {
+        $errors = parent::instance_form_validation($data, $files);
+        $elementname = $this->get_form_element_name();
+
+        $value = $data[$elementname] ?? '';
+        if (is_array($value)) {
+            $value = implode(',', array_filter($value));
+        }
+
+        $ids = self::parse_ids($value);
+        if (empty($ids)) {
+            return $errors;
+        }
+
+        $config = $this->get_field()->get('configdata') ?: [];
+        $entitytype = $config['entitytype'] ?? 'user';
+        $providerclass = field_controller::get_provider_class($entitytype);
+        if (!$providerclass) {
+            return $errors;
+        }
+
+        $invalid = $providerclass::validate_ids($ids, $config);
+        if (!empty($invalid)) {
+            $errors[$elementname] = get_string('invalidselection', 'customfield_lookup');
+        }
+
+        return $errors;
+    }
+
+    /**
      * Prepares the custom field data to pass to mform->set_data().
      *
      * For multi-select, we need to convert the comma-separated string back to an array.
@@ -140,14 +174,7 @@ class data_controller extends \core_customfield\data_controller {
      */
     public function export_value() {
         $value = $this->get_value();
-        if (empty($value)) {
-            return null;
-        }
-
-        $ids = explode(',', $value);
-        $ids = array_map('intval', $ids);
-        $ids = array_filter($ids);
-
+        $ids = self::parse_ids($value);
         if (empty($ids)) {
             return null;
         }
@@ -157,11 +184,24 @@ class data_controller extends \core_customfield\data_controller {
         $providerclass = field_controller::get_provider_class($entitytype);
 
         if (!$providerclass) {
-            return $value;
+            throw new \moodle_exception('unknownentitytype', 'customfield_lookup', '', $entitytype);
         }
 
-        $displayvalues = $providerclass::get_display_values($ids);
+        $displayvalues = $providerclass::get_display_values($ids, $config);
 
         return implode(', ', $displayvalues);
+    }
+
+    /**
+     * Parse a stored comma-separated value into a list of positive integer IDs.
+     *
+     * @param string|null $value
+     * @return int[]
+     */
+    private static function parse_ids(?string $value): array {
+        if (empty($value)) {
+            return [];
+        }
+        return array_values(array_filter(array_map('intval', explode(',', $value))));
     }
 }

@@ -25,11 +25,19 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['pluginname'] = 'Lookup';
-$string['privacy:metadata'] = 'The Lookup field type plugin doesn\'t store any personal data; it uses tables defined in core.';
-$string['specificsettings'] = 'Lookup field settings';
+$string['displayformat'] = 'Display format';
+$string['displayformat_firstname'] = 'First name';
+$string['displayformat_firstname_lastname'] = 'First name + last name';
+$string['displayformat_fullname'] = 'Full name';
+$string['displayformat_lastname'] = 'Last name';
+$string['displayformat_lastname_firstname'] = 'Last name + first name';
 $string['entitytype'] = 'Entity type';
 $string['entitytype_user'] = 'Users';
+$string['invalidselection'] = 'One or more selected items are no longer available. Please reselect.';
 $string['multiselect'] = 'Allow multiple selections';
+$string['pluginname'] = 'Lookup';
+$string['privacy:metadata'] = 'The Lookup field type plugin doesn\'t store any personal data; it uses tables defined in core.';
 $string['rolefilter'] = 'Filter by roles';
 $string['rolefilter_help'] = 'Only users with the selected roles will be available for selection. Leave empty to allow all users.';
+$string['specificsettings'] = 'Lookup field settings';
+$string['unknownentitytype'] = 'Unknown entity type: {$a}';

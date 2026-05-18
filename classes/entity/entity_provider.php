@@ -25,10 +25,10 @@
 
 namespace customfield_lookup\entity;
 
-defined('MOODLE_INTERNAL') || die;
-
+/**
+ * Interface implemented by entity providers used by the lookup custom field.
+ */
 interface entity_provider {
-
     /**
      * Return the entity type key.
      *
@@ -57,7 +57,7 @@ interface entity_provider {
      * @param string $query
      * @param array $configdata
      * @param int $limit
-     * @return array Array of ['id' => int, 'label' => string]
+     * @return array Array of ['id' => int, 'fullname' => string]
      */
     public static function search(string $query, array $configdata, int $limit = 20): array;
 
@@ -65,9 +65,10 @@ interface entity_provider {
      * Get display value for one or more entity IDs.
      *
      * @param array $ids
+     * @param array $configdata
      * @return array Array of id => display string
      */
-    public static function get_display_values(array $ids): array;
+    public static function get_display_values(array $ids, array $configdata = []): array;
 
     /**
      * Validate that the given IDs are valid and selectable.
@@ -77,4 +78,11 @@ interface entity_provider {
      * @return array Array of invalid IDs
      */
     public static function validate_ids(array $ids, array $configdata): array;
+
+    /**
+     * Require the calling user has permission to search this entity type.
+     *
+     * @param \context $context
+     */
+    public static function require_search_capability(\context $context): void;
 }

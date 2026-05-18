@@ -32,10 +32,10 @@ use core_external\external_single_structure;
 use core_external\external_value;
 use customfield_lookup\field_controller;
 
-defined('MOODLE_INTERNAL') || die;
-
+/**
+ * External function that searches entities for the lookup custom field autocomplete.
+ */
 class search extends external_api {
-
     /**
      * Describes the parameters.
      *
@@ -66,20 +66,18 @@ class search extends external_api {
         $context = \context_system::instance();
         self::validate_context($context);
 
-        // Load the field and its config.
         $field = \core_customfield\field_controller::create($fieldid);
         $configdata = $field->get('configdata') ?: [];
-
         $entitytype = $configdata['entitytype'] ?? 'user';
         $providerclass = field_controller::get_provider_class($entitytype);
 
         if (!$providerclass) {
-            return ['results' => []];
+            throw new \moodle_exception('unknownentitytype', 'customfield_lookup', '', $entitytype);
         }
 
-        $results = $providerclass::search($query, $configdata);
+        $providerclass::require_search_capability($context);
 
-        return ['results' => $results];
+        return ['results' => $providerclass::search($query, $configdata)];
     }
 
     /**
